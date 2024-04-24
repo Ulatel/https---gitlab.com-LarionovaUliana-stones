@@ -15,16 +15,16 @@ class YoloModel:
         self.yolo = YOLO('yolov8n.pt', task=config.task)
         self.config.logger.info(f"YOLO inited: model_path: {'yolov8n.pt'}; task: {config.task}")
 
-    def train(self, data, images, epochs=const.EPOCHS, batch=const.BATCH):
+    def train(self, images=640, epochs=const.EPOCHS, batch=const.BATCH):
         self.config.logger.info("YOLO started train")
-        self.yolo.train(data=data, imgsz=640, epochs=epochs, batch=batch)
-        self._save_model()
+        self.yolo.train(data=const.MODELS_PATH, imgsz=images, epochs=epochs, batch=batch)
+        #self._save_model()
         self.config.logger.info("YOLO finished train")
 
-    def evaluate(self, data, images):
+    def evaluate(self, images=640):
         # Оценка модели YOLO
         self.config.logger.info("YOLO started validation")
-        results = self.yolo.val(data=data, imgsz=images)
+        results = self.yolo.val(data=const.MODELS_PATH, imgsz=images)
         output = {
             'mAP50': results.results_dict['metrics/mAP50(M)'],
             'precision': results.results_dict['metrics/precision(B)'],
@@ -34,7 +34,7 @@ class YoloModel:
         self.config.logger.info("YOLO finished validation")
         return output
       
-    def predict(self, path: str, task: str, save: bool, save_txt: bool, stream: bool):
+    def predict(self, path: str, task=const.TASK, save=True, save_txt=True, stream=True):
         # Предсказание с помощью модели YOLO\
 
         self.config.logger.info(f"YOLO started prediction: {path}")
@@ -42,18 +42,15 @@ class YoloModel:
         for _ in generators:
             pass
         self.config.logger.info(f"YOLO predicted: {path}")
-        
+    
     def _save_model(self):
         self.config.logger.info('started _save_model method')
         
         if not os.path.exists(const.MODELS_FOLDER_PATH):
             os.mkdir(const.MODELS_FOLDER_PATH)
-        
-        if os.path.exists(const.YOLO_PATH):
-            new_path = str('_'.join([self.model_name, str(datetime.now().timestamp()).split(".")[0]]))+'.pt'
-            os.rename(const.YOLO_PATH, os.path.join(const.MODELS_PATH, new_path))
-        else:
-            raise FileNotFoundError("trained model hasn't been saved")
+            
+        new_path = str('_'.join(['YOLO', str(datetime.datetime.now().timestamp()).split(".")[0]]))+'.pt'
+        os.rename('runs\detect\train', os.path.join(const.MODELS_FOLDER_PATH, new_path))
         
         self.config.logger.info('_save_model method successfully executed')
         # TODO: update this

@@ -2,15 +2,16 @@
 IMAGE_DIR = 'src/data/clodding_train'
 ANNOTATION_DIR = 'src/data/yolo'
 LOG_PATH = 'src/data/log_file.log'
+MODELS_FOLDER_PATH = 'src/models'
 
 # Model configuration
 MODEL_NAME = 'yolo'
 NEED_TRAIN = True
-EPOCHS = 10
+EPOCHS = 5
 BATCH = 4
 MODELS_PATH = 'src/datasets/data.yaml'
-YOLO_PATH = MODELS_PATH+'/yolo'
-YOLO_PRETRAINED_PATH = MODELS_PATH+'/yolo8n.pt'
+YOLO_PATH = MODELS_FOLDER_PATH+'/yolo'
+YOLO_PRETRAINED_PATH = MODELS_FOLDER_PATH+'/yolo8n.pt'
 TASK = 'segment'
 
 # Augmentation parameters

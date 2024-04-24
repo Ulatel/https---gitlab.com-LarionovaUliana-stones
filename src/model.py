@@ -120,10 +120,10 @@ class My_Model:
 
     def train(self):
         # self.data.prepare_data()
-        self.model.train(const.MODELS_PATH, self.data.train_img)
+        self.model.train()
         
     def evaluate(self):
-        pass
+        self.model.evaluate()
         
     def demo(self):
         pass
