@@ -3,7 +3,12 @@ import numpy as np
 import cv2
 import random
 import os
-from utils import const, config
+
+from utils.log import logger_init
+from utils import const
+from utils.config import Config
+
+from models.yolo import YoloModel
 
 logger = logging
 
@@ -85,22 +90,64 @@ class DataPreparer:
                 annotations = self._read_yolo_annotation(annotation_path)
                 annotation_data.append(annotations)
                 annotation_data.append(annotations)
-
-        # Пример вывода информации о данных
+        
         self.logger.info(f"Images count: {len(image_data)}")
         self.logger.info(f"Annotations count: {len(annotation_data)}")
         
         return image_data, annotation_data
 
-    def prepare_data_for_predict(self):
+    def prepare_data(self):
+        self.logger.info("Start preparing data for prediction")
         image_data, annotation_data = self._data_init()
         self.train_img, self.test_img, self.train_annot, self.test_annot = self._split_data(image_data, annotation_data)
+        self.logger.info("End preparing data for prediction")
 
 
+class Shower:
+    def __init__(self, config):
+        self.config = config
+        
 
-config = None
-data = DataPreparer(config)
-data.prepare_data_for_predict()
+class My_Model:
+    def __init__(self, config):
+        self.config = config
+        self.shower = Shower(self.config)
+        self.data = DataPreparer(self.config)
+        if self.config.model_name == 'yolo':
+            self.model = YoloModel(self.config)
+        else:
+            self.model = None
+
+    def train(self):
+        # self.data.prepare_data()
+        self.model.train(const.MODELS_PATH, self.data.train_img)
+        
+    def evaluate(self):
+        pass
+        
+    def demo(self):
+        pass
+        
+  
+def init_config(model_name=const.MODEL_NAME):
+    config = Config(
+        img_path=const.IMAGE_DIR,
+        annotation_path=const.ANNOTATION_DIR,
+        log_path=const.LOG_PATH,
+        log_eval_path=const.LOG_PATH,
+        need_training=const.NEED_TRAIN,
+        model_name=model_name,
+        model_path=const.MODELS_PATH,
+        task=const.TASK,
+        logger=logger_init(),
+    )
+    return config
+
+
+config = init_config()
+
+model = My_Model(config)
+model.train()
 
 """config = None
 data = DataPreparer(config)

@@ -1,3 +1,7 @@
 src/data
+src/datasets
+runs
+.idea
+*.pt
 *.pyc
 *.avi
