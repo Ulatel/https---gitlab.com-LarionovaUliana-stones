@@ -1,19 +1,20 @@
-
+from functools import partial
 from ultralytics import YOLO
 from utils import const
-
+import darknet
 import os
 import datetime
 
 from ultralytics import YOLO
-
+import numpy as np
+import cv2
 
 class YoloModel:
     def __init__(self, config):
         #  YOLO model initialization
         self.config = config
-        self.yolo = YOLO('yolov8n.pt', task=config.task)
-        self.config.logger.info(f"YOLO inited: model_path: {'yolov8n.pt'}; task: {config.task}")
+        self.yolo = YOLO('best.pt', task=config.task)
+        self.config.logger.info(f"YOLO inited: model_path: {'best.pt'}; task: {config.task}")
 
     def train(self, images=640, epochs=const.EPOCHS, batch=const.BATCH):
         self.config.logger.info("YOLO started train")
@@ -38,12 +39,23 @@ class YoloModel:
         # Предсказание с помощью модели YOLO\
 
         self.config.logger.info(f"YOLO started prediction: {path}")
-        generators = self.estimator.predict(source=path, task=task, save=save, save_txt=save_txt, stream=stream)
+        generators = self.yolo.predict(source=path, task=task, save=save, save_txt=save_txt, stream=stream)
+        print(generators)
         for _ in generators:
-            pass
+            print(_)
         self.config.logger.info(f"YOLO predicted: {path}")
     
     def _save_model(self):
+
+        cfg_file = "yolov3.cfg"
+        weights_file = "yolov3.weights"
+        darknet.save_weights(self.model, "saved_weights.weights")
+
+        # Сохранение конфигурации модели
+        cfg_buffer = darknet.model_to_json(self.model)
+        with open("saved_config.cfg", 'w') as cfg_file:
+            cfg_file.write(cfg_buffer.decode("utf-8"))
+            
         self.config.logger.info('started _save_model method')
         
         if not os.path.exists(const.MODELS_FOLDER_PATH):
@@ -55,23 +67,19 @@ class YoloModel:
         self.config.logger.info('_save_model method successfully executed')
         # TODO: update this
 
-    def _load_model(self, use_default_model: bool = False, model_path=None) -> None:
-        """Method that loads a model.
+    def warmup(self, model_path=const.YOLO_PRETRAINED_PATH) -> None:
+        """Method that wormup a model.
 
         Parameters:
-        - use_default_model: bool, use standard pretrained YOLO model
         - model_path: Optional[str], path to model
         """
 
         self.config.logger.info('Started load_model method')
 
-        if model_path is not None:
-            self.model = YoloModel(model_path, task=const.TASK)
-        elif not use_default_model:
-            self.model = YoloModel(const.YOLO_PATH, task=const.TASK)
-            self.config.logger.info(f"loaded model: {const.YOLO_PATH}")
-        else:
-            self.model = YoloModel(const.YOLO_PRETRAINED_PATH, task=const.TASK)
-            self.config.logger.info(f"loaded model: {const.YOLO_PRETRAINED_PATH}")
+        self.model = YOLO('best.pt', task=const.TASK)
+        self.config.logger.info(f"loaded model: {const.YOLO_PRETRAINED_PATH}")
 
         self.config.logger.info('load_model method successfully executed')
+             
+    def demo(self, path='clodding_train.avi', track=False):
+        pass

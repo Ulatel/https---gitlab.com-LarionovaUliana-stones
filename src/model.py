@@ -3,6 +3,8 @@ import numpy as np
 import cv2
 import random
 import os
+import json
+import fire
 
 from utils.log import logger_init
 from utils import const
@@ -125,8 +127,14 @@ class My_Model:
     def evaluate(self):
         self.model.evaluate()
         
+    def warmup(self, path=const.YOLO_PRETRAINED_PATH):
+        self.model.warmup(path)
+    
+    def predict(self, path='example.jpg'):
+        self.model.predict(path)    
+    
     def demo(self):
-        pass
+        self.model.demo()
         
   
 def init_config(model_name=const.MODEL_NAME):
@@ -147,17 +155,53 @@ def init_config(model_name=const.MODEL_NAME):
 config = init_config()
 
 model = My_Model(config)
-model.train()
-
-"""config = None
-data = DataPreparer(config)
-image = cv2.imread('example.jpg', 0)
-
-new_image = data.apply_sharpen_filter(image, 1)  # Используем метод экземпляра класса
-cv2.imshow('Original Image', image)
-cv2.imshow('Changed Contrast Image', new_image)
-cv2.waitKey(0)
-cv2.destroyAllWindows()"""
+model.warmup()
+model.predict()
+model.demo()
 
 
+class CLI():
+    def train(self):
+        try:
+            model.train()
+        except Exception as ex:
+            raise Exception(
+                detail=str(ex),
+                status_code=ex.code if hasattr(object, 'code') else 500
+            )
+        
+    def evaluate(self):
+        try:
+            model.evaluate()
+        except Exception as ex:
+            raise Exception(
+                detail=str(ex),
+                status_code=ex.code if hasattr(object, 'code') else 500
+            )
 
+    def warmup(self, path):
+        try:
+            model.warmup(path)
+        except Exception as ex:
+            raise Exception(
+                detail=str(ex),
+                status_code=ex.code if hasattr(object, 'code') else 500
+            )
+            
+    def predict(self, path='example.jpg'):
+        try:
+            top_indices, top_scores = model.predict()
+            return json.dumps({})
+        except Exception as ex:
+            raise Exception(
+                detail=str(ex),
+                status_code=ex.code if hasattr(object, 'code') else 500
+            )
+            
+    def predict_video(self, path='clodding_train.avi'):
+        pass
+
+
+"""if __name__ == '__main__':
+    fire.Fire(CLI)
+"""

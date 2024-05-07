@@ -7,11 +7,11 @@ MODELS_FOLDER_PATH = 'src/models'
 # Model configuration
 MODEL_NAME = 'yolo'
 NEED_TRAIN = True
-EPOCHS = 5
+EPOCHS = 1
 BATCH = 4
 MODELS_PATH = 'src/datasets/data.yaml'
 YOLO_PATH = MODELS_FOLDER_PATH+'/yolo'
-YOLO_PRETRAINED_PATH = MODELS_FOLDER_PATH+'/yolo8n.pt'
+YOLO_PRETRAINED_PATH = 'best.pt'
 TASK = 'segment'
 
 # Augmentation parameters
