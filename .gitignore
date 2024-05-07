@@ -5,3 +5,5 @@ runs
 *.pt
 *.pyc
 *.avi
+*.jpg
+*.png
