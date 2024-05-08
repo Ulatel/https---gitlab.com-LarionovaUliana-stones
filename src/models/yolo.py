@@ -60,17 +60,22 @@ class YoloModel:
 
         self.config.logger.info('load_model method successfully executed')
              
-    def demo(self, file='data/train.mp4'):  
+    def demo(self, file='data/train.mp4', window_width=800, window_height=600):  
         video = cv2.VideoCapture(file)  
+        cv2.namedWindow('Tracking', cv2.WINDOW_NORMAL)  
+        cv2.resizeWindow('Tracking', window_width, window_height)  
         try:  
+            print('Tracking started successfully')
             while True:  
                 ret, frame = video.read()  
                 if not ret:  
                     break  
                 results = self.model.track(frame, persist=True, verbose=False) 
+                print(results)
                 plot_frame = results[0].plot() 
                 if plot_frame is not None: 
-                    cv2.imshow('Tracking', plot_frame)  
+                    resized_frame = cv2.resize(plot_frame, (window_width, window_height))  
+                    cv2.imshow('Tracking', resized_frame)  
                     if cv2.waitKey(1) & 0xFF == ord('q'):  
                         break  
         except KeyboardInterrupt:  
