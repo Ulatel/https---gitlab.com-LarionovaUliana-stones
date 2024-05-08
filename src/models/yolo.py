@@ -60,26 +60,32 @@ class YoloModel:
 
         self.config.logger.info('load_model method successfully executed')
              
-    def demo(self, file='data/train.mp4', window_width=800, window_height=600):  
-        video = cv2.VideoCapture(file)  
-        cv2.namedWindow('Tracking', cv2.WINDOW_NORMAL)  
-        cv2.resizeWindow('Tracking', window_width, window_height)  
-        try:  
-            print('Tracking started successfully')
-            while True:  
-                ret, frame = video.read()  
-                if not ret:  
-                    break  
-                results = self.model.track(frame, persist=True, verbose=False) 
-                print(results)
-                plot_frame = results[0].plot() 
-                if plot_frame is not None: 
-                    resized_frame = cv2.resize(plot_frame, (window_width, window_height))  
-                    cv2.imshow('Tracking', resized_frame)  
-                    if cv2.waitKey(1) & 0xFF == ord('q'):  
-                        break  
-        except KeyboardInterrupt:  
-            print('Received keyboard interrupt')  
-        finally:  
-            video.release()  
+    def demo(self, file='data/train.mp4', window_width=800, window_height=600):   
+        self.config.logger.info('Tracking started') 
+        video = cv2.VideoCapture(file)   
+        cv2.namedWindow('Tracking', cv2.WINDOW_NORMAL)   
+        cv2.resizeWindow('Tracking', window_width, window_height) 
+        max_size = 0  
+        try:   
+            while True:   
+                ret, frame = video.read()   
+                if not ret:   
+                    break   
+                results = self.model.track(frame, persist=True, verbose=False)                  
+                max_id = int(max(results[0].boxes.id, default=0))
+                max_size = max([(xywh[3]-xywh[1])*(xywh[2]-xywh[1]) for xywh in results[0].boxes.xywh] + [max_size])
+
+                cv2.putText(frame, f'Stone count: {max_id}', (15, 25), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255), 2)
+                cv2.putText(frame, f'Max size: {max_size}', (15, 55), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255), 2)
+                
+                plot_frame = results[0].plot()  
+                if plot_frame is not None:  
+                    resized_frame = cv2.resize(plot_frame, (window_width, window_height))   
+                    cv2.imshow('Tracking', resized_frame)   
+                    if cv2.waitKey(1) & 0xFF == ord('q'):   
+                        break   
+        except KeyboardInterrupt:   
+            self.config.logger.info('Received keyboard interrupt')   
+        finally:   
+            video.release()   
             cv2.destroyAllWindows()
