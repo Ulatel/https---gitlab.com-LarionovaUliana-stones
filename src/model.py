@@ -21,11 +21,11 @@ class My_Model:
         else:
             self.model = None
 
-    def train(self):
-        self.model.train()
+    def train(self, path):
+        self.model.train(path)
         
-    def evaluate(self):
-        self.model.evaluate()
+    def evaluate(self, path):
+        self.model.evaluate(path)
         
     def warmup(self, path=const.YOLO_PRETRAINED_PATH):
         self.model.warmup(path)
@@ -57,31 +57,31 @@ config = init_config()
 model = My_Model(config)
 model.warmup()
 #model.predict()
-model.demo()
+#model.demo(path='data/clodding_test_ololo.mp4')
 
 
 class CLI():
-    def train(self):
+    def train(self, data_path=const.MODELS_PATH):
         try:
-            model.train()
+            model.train(data_path)
         except Exception as ex:
             raise Exception(
                 detail=str(ex),
                 status_code=ex.code if hasattr(object, 'code') else 500
             )
         
-    def evaluate(self):
+    def evaluate(self, model_path = const.MODELS_PATH):
         try:
-            model.evaluate()
+            model.evaluate(model_path)
         except Exception as ex:
             raise Exception(
                 detail=str(ex),
                 status_code=ex.code if hasattr(object, 'code') else 500
             )
 
-    def warmup(self, path):
+    def warmup(self, model_path=const.YOLO_PRETRAINED_PATH):
         try:
-            model.warmup(path)
+            model.warmup(model_path)
         except Exception as ex:
             raise Exception(
                 detail=str(ex),
@@ -98,10 +98,14 @@ class CLI():
                 status_code=ex.code if hasattr(object, 'code') else 500
             )
             
-    def predict_video(self, path='clodding_train.avi'):
-        pass
+    def predict_video(self, path='data/clodding_test_ololo.mp4'):
+        try:
+            model.demo(path=path)
+        except Exception as ex:
+            raise Exception(
+                detail=str(ex),
+                status_code=ex.code if hasattr(object, 'code') else 500
+            )
 
-
-"""if __name__ == '__main__':
+if __name__ == '__main__':
     fire.Fire(CLI)
-"""

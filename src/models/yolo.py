@@ -18,12 +18,12 @@ class YoloModel:
         self.model = YOLO('runs/segment/train11/weights/best.pt', task=config.task)
         self.config.logger.info(f"YOLO inited: model_path: {'best.pt'}; task: {config.task}")
 
-    def train(self, images=640, epochs=const.EPOCHS, batch=const.BATCH):
+    def train(self, path, images=640, epochs=const.EPOCHS, batch=const.BATCH):
         self.config.logger.info("YOLO started train")
-        self.model.train(data=const.MODELS_PATH, imgsz=images, epochs=epochs, batch=batch)
+        self.model.train(data=path, imgsz=images, epochs=epochs, batch=batch)
         self.config.logger.info("YOLO finished train")
 
-    def evaluate(self, images=640):
+    def evaluate(self, path, images=640):
         # Оценка модели YOLO
         self.config.logger.info("YOLO started validation")
         results = self.model.val(data=const.MODELS_PATH, imgsz=images)
@@ -72,7 +72,7 @@ class YoloModel:
                 if not ret:   
                     break   
                 results = self.model.track(frame, persist=True, verbose=False)                  
-                max_id = int(max(results[0].boxes.id, default=0))
+                max_id = int(max(results[0].boxes.id))
                 max_size = max([(xywh[3]-xywh[1])*(xywh[2]-xywh[1]) for xywh in results[0].boxes.xywh] + [max_size])
 
                 cv2.putText(frame, f'Stone count: {max_id}', (15, 25), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255), 2)
